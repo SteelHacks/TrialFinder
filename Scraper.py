@@ -168,21 +168,32 @@ class Scraper(object):
                 result += line + "\n"
         return result.strip()
 
+    def getSummary(self, title):
+        result = title + "\n\n"
+        result += "URL:\n" + self.url_map[title] + "\n\n"
+        timeframe = self.getTimeFrame(title)
+        result += "Start Date: " + timeframe[0] + "\n"
+        result += "End Date: " + timeframe[1] + "\n" + "\n\n"
+        result += self.getPurpose(title) + "\n\n"
+        result += self.getCriteria(title) + "\n\n"
+        result += self.getExclusion(title)
+        return result
+
+
 keywords = ["diabetes"]
 x = Scraper()
 titles = x.searchAllStudies(keywords)
 i = 2
 #title
-print(titles[i], end = "\n\n")
+#print(titles[i], end = "\n\n")
 #URL
-print(x.url_map[titles[i]], end = "\n\n")
+#print(x.url_map[titles[i]], end = "\n\n")
 #START AND END DATE
-print(x.getTimeFrame(title = titles[i]), end = "\n\n")
+#print(x.getTimeFrame(title = titles[i]), end = "\n\n")
 #PURPOSE
-print(x.getPurpose(titles[i]), end = "\n\n")
+#print(x.getPurpose(titles[i]), end = "\n\n")
 #INCLUSION CRITERIA
-print(x.getCriteria(titles[i]), end = "\n\n")
+#print(x.getCriteria(titles[i]), end = "\n\n")
 #EXCLUSION CRITERIA
-print(x.getExclusion(titles[i]), end = "\n\n")
-
-
+#print(x.getExclusion(titles[i]), end = "\n\n")
+print(x.getSummary(titles[i]))

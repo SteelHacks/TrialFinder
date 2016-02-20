@@ -138,6 +138,21 @@ class Scraper(object):
 
     def getCriteria(self, title = None, link = None):
         soup = self.processURL(title, link)
+        html = str(soup).splitlines()
+        start_index = html.index("<!-- eligibility_section -->")
+        next_section = "<!-- location_section -->"
+        end_index = html.index(next_section)
+        result = ""
+        start = False
+        for i in range(start_index, end_index):
+            line = self.removeMarkup(html[i])
+            if(start == False and line.find("Inclusion") != -1):
+                start = True
+            elif(line.find("Exclusion") != -1): 
+                break
+            if(self.isASCII(line) and start == True):
+                result += line + "\n"
+        return result
 
     def getDescription(self, title = None, link = None):
         soup = self.processURL(title, link)
@@ -151,12 +166,4 @@ class Scraper(object):
 #print(x.getTimeFrame(title = titles[6]))
 #print(x.url_map[titles[3]])
 #print(x.getPurpose(titles[3]))
-
-
-
-
-
-
-
-
-
+#print(x.getCriteria(titles[8]))

@@ -152,10 +152,26 @@ class Scraper(object):
                 result += line + "\n"
         return result.strip()
 
-keywords = ["trisomy", "21"]
+    def getExclusion(self, title = None, link = None):
+        soup = self.processURL(title, link)
+        html = str(soup).splitlines()
+        start_index = html.index("<!-- eligibility_section -->")
+        next_section = "<!-- location_section -->"
+        end_index = html.index(next_section)
+        result = ""
+        start = False
+        for i in range(start_index, end_index):
+            line = self.removeMarkup(html[i])
+            if(start == False and line.find("Exclusion") != -1):
+                start = True
+            if(self.isASCII(line) and start == True):
+                result += line + "\n"
+        return result.strip()
+
+keywords = ["diabetes"]
 x = Scraper()
 titles = x.searchAllStudies(keywords)
-i = 5
+i = 2
 #title
 print(titles[i], end = "\n\n")
 #URL
@@ -166,3 +182,7 @@ print(x.getTimeFrame(title = titles[i]), end = "\n\n")
 print(x.getPurpose(titles[i]), end = "\n\n")
 #INCLUSION CRITERIA
 print(x.getCriteria(titles[i]), end = "\n\n")
+#EXCLUSION CRITERIA
+print(x.getExclusion(titles[i]), end = "\n\n")
+
+

@@ -46,7 +46,7 @@ class Scraper(object):
 
 keywords = ["cancer", "diabetes", "cholesterol"]
 x = Scraper()
-x.searchAllStudies(keywords)
+print(x.searchAllStudies(keywords))
 
 
 

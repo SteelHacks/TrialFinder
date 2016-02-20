@@ -103,9 +103,38 @@ class Scraper(object):
             if(self.isASCII(line)):
                 result += line + "\n"
         return result
-            
+    
+    #returns (start, end) of study / (None, None) if no date found        
     def getTimeFrame(self, title = None, link = None):
         soup = self.processURL(title, link)
+        html = str(soup).splitlines()
+        start = self.getStart(soup, html)
+        end = self.getEnd(soup, html)
+        return (start, end)
+        
+
+    def getStart(self, soup, html):
+        length = len(html)
+        start_index = None
+        for i in range(length):
+            if(html[i].find("Start Date") != -1):
+                start_index = i + 1
+        if(start_index == None): return None
+        return self.removeMarkup(html[start_index])
+
+    def getEnd(self, soup, html):
+        length = len(html)
+        end_index = None
+        for i in range(length):
+            if(html[i].find("Completion Date") != -1):
+                end_index = i + 1
+        if(end_index == None): return None
+        result = self.removeMarkup(html[end_index])
+        date = (result.split(" "))
+        if(len(date) > 2):
+            result = date[0] + " " + date[1]
+        return result
+
 
     def getCriteria(self, title = None, link = None):
         soup = self.processURL(title, link)
@@ -118,6 +147,8 @@ class Scraper(object):
 #keywords = ["cancer", "diabetes", "cholesterol"]
 #x = Scraper()
 #titles = x.searchAllStudies(keywords)
+#print(x.url_map[titles[5]])
+#print(x.getTimeFrame(title = titles[6]))
 #print(x.url_map[titles[3]])
 #print(x.getPurpose(titles[3]))
 

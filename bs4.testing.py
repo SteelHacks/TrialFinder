@@ -8,7 +8,10 @@ r = requests.get("https://clinicaltrials.gov/ct2/results?term=&Search=Search")
 soup = BeautifulSoup(r.content) # clean up the html code
 
 # this prints out an easier to read version of the html stuff
-#print(soup.prettify())
+print(soup.prettify())
+
+for x in range(50):
+    print("\n")
 
 # this find all links starting with a, puts in list
 #soup.find_all("a")

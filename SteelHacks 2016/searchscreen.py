@@ -1,93 +1,85 @@
 from tkinter import *
+
+# import all necessary files
 import Scraper
-from ScrolledCanvas import *
+import welcome
+import searchscreen
+import homepage
+import editprofile
+import ScrolledCanvas
+import newUser
 
-class searchRect(object):
-    def __init__(self,data,canvas):
-        self.moreButton = Button(data.root, bd = 5, font = "Helvetica 12",
-               text = "More", command = lambda: indivSearch(data))
-        self.faveButton = Button(data.root, bd = 5, font = "Helvetica 12",
-               text = "Favorite", command = lambda: faveSearch(data))
+class Struct(object): pass
+data = Struct()
 
-def initBrowse(data,canvas):
-    data.canvas = canvas
+def initAll(data,canvas):
 
-    data.searchInput = ""
-    data.searchBarClicked = False
-    data.searchBarWidth = 400
-    data.searchBarHeight = 50
-    data.searchBarLeft = 150
-    data.searchBarTop = 50
-    data.searchEntry = Entry(data.root, bd = 10)
+    canvas.config(bg="black")
 
-    data.searchButtonWidth = 100
-    data.searchButtonHeight = 41
-    data.searchButtonLeft = 600
-    data.searchButtonTop = 50
-    data.searchButtonClicked = False
-    data.searchButton2 = Button(data.root, bd = 5, font = "Helvetica 12", 
-                   text = "Search", command = lambda: makeSearch(data))
-    data.searchTerms = []
-    data.searchList = {1:None, 2:None, 3:None, 4:None, 5:None}
-    data.searchRects = [searchRect(data,canvas),searchRect(data,canvas),
-                        searchRect(data,canvas),searchRect(data,canvas),
-                        searchRect(data,canvas)]
-    data.currentRectNum = None
+    # variables
+    data.mode = "welcomeScreen"
+    data.backToHomeButton = Button(canvas,text="Back to Home",command = lambda: backToHomeButtonPressed(data),bg="white")
+    data.currentUser = None
 
-    data.scraper = Scraper()
-    data.showResults = False
-    data.titles = None
+    # init all modes
+    welcome.initWelcome(data)
+    homepage.initHomepage(data,canvas)
+    editprofile.initEditProfile(data)
+    searchscreen.initBrowse(data,canvas)
+    newUser.initNewUser(data,canvas)
 
-    data.scrollStart = 0
-    data.scrollEnd = 5
+def backToHomeButtonPressed(data):
+    print("backToHomeButton pressed")
+    data.mode = "homepage"
 
-    data.backButton = Button(data.root, bd = 5, font = "Helvetica 12",
-                      text = "Back", command = lambda: searchBack(data))
-    data.nextButton = Button(data.root, bd = 5, font = "Helvetica 12", 
-                      text = "Next", command = lambda: searchNext(data))
+####################################
+# mode dispatcher
+####################################
 
-def browseMousePressed(event, data):
-    pass
+def mousePressed(event, data):
+    if (data.mode == "welcomeScreen"): welcome.welcomeMousePressed(event, data)
+    if (data.mode == "homepage"): homepage.homepageMousePressed(event,data)
+    if (data.mode == "editProfile"): editprofile.editProfileMousePressed(event,data)
+    if (data.mode == "browse"): searchscreen.browseMousePressed(event,data)
+    if (data.mode == "newUser"): newUser.newUserMousePressed(event,data)
 
-def browseKeyPressed(event, data):
-    pass
+def keyPressed(event, data):
+    if (data.mode == "welcomeScreen"): welcome.welcomeKeyPressed(event, data)
+    if (data.mode == "homepage"):homepage.homepageKeyPressed(event,data)
+    if (data.mode == "editProfile"):editprofile.editProfileKeyPressed(event,data)
+    if (data.mode == "browse"): searchscreen.browseKeyPressed(event,data)
+    if (data.mode == "newUser"): newUser.newUserKeyPressed(event,data)
 
-def browseTimerFired(data):
-    pass
+def timerFired(data):
+    if (data.mode == "welcomeScreen"): welcome.welcomeTimerFired(data)
+    if (data.mode == "homepage"): homepage.homepageTimerFired(data)
+    if (data.mode == "editProfile"): editprofile.editProfileTimerFired(data)
+    if (data.mode == "browse"): searchscreen.browseTimerFired(data)
+    if (data.mode == "newUser"): newUser.newUserTimerFired(data)
 
-def browseRedrawAll(canvas, data):
-    x,y = data.searchBarLeft, data.searchBarTop
-    canvas.create_window(x,y, anchor = NW, width = data.searchBarWidth, window = data.searchEntry)
+def redrawAll(canvas, data):
+    if (data.mode == "welcomeScreen"): welcome.welcomeRedrawAll(canvas, data)
+    if (data.mode == "homepage"): homepage.homepageRedrawAll(canvas,data)
+    if (data.mode == "editProfile"): editprofile.editProfileRedrawAll(canvas,data)
+    if (data.mode == "browse"): searchscreen.browseRedrawAll(canvas,data)
+    if (data.mode == "newUser"): newUser.newUserRedrawAll(canvas,data)
 
-    w,x = data.searchButtonLeft, data.searchButtonTop
-    y,z = data.searchButtonWidth, data.searchButtonHeight
-    canvas.create_window(w,x, anchor = NW, width = y, height = z, window = data.searchButton2)
-    if data.titles != None: 
-        drawSearchPreviews(canvas,data)
+# placed in the main file to be binded to <Motion>
+def detectHover(event,canvas,data):
+    if(data.mode == "newUser"): 
+        newUser.mouseMotion(event,data)
+        return
+    # if menu is already there, then show it until the mouse is off the menu
+    if(data.displayMenu and
+       canvas.winfo_pointerx()-canvas.winfo_rootx() < data.menuSize[0]):
+        return
+    # menu appears when user hovers in top left corner of window
+    # top left 50 x 50 pixel square
+    elif(canvas.winfo_pointerx()-canvas.winfo_rootx() > 50):
+        data.displayMenu = False
+    else: data.displayMenu = True
 
-def drawSearchPreviews(canvas,data):
-    x,y = data.searchBarLeft, data.searchBarTop + data.searchBarHeight + 100
-    for i in range(data.scrollStart, data.scrollEnd):
-        data.currentRectNum = i
-        canvas.create_window(725,y,anchor = NW, width = 100, height = 50, 
-                             window = data.searchRects[(i-1)%5].moreButton)
-        canvas.create_window(725,y + 75, anchor = NW, width = 100, height = 50,
-                             window = data.searchRects[(i-1)%5].faveButton)
-
-        (charLimit, spacing, endGap) = (41,32,37)
-        y = createTitle(canvas, data.searchList[i][0], "Helvetica 18", charLimit, x, y, spacing, endGap)
-        (charLimit, spacing, endGap) = (100,15,30)
-        y = createTitle(canvas, data.searchList[i][1], "Helvetica 12", charLimit, x, y, spacing, endGap)
-        (charLimit, spacing, endGap) = (90,15,55)
-        y = createTitle(canvas, data.searchList[i][2], "Helvetica 8",  charLimit, x, y, spacing, endGap)
-        
-        y += 75
-
-    canvas.create_window(x,y, anchor = NW, width = 100, height = 50, window = data.backButton)
-    x += 100
-    canvas.create_window(x,y, anchor = NW, width = 100, height = 50, window = data.nextButton)
-
-def run(width=300, height=300):
+def run(width=850, height=700):
     def redrawAllWrapper(canvas, data):
         data.canv.delete()
         redrawAll(canvas, data)
@@ -111,98 +103,25 @@ def run(width=300, height=300):
     data = Struct()
     data.width = width
     data.height = height
-    data.timerDelay = 500 # milliseconds
+    data.timerDelay = 40 # milliseconds
     # create the root and the canvas
     root = Tk()
     frame = Frame(root)
-    canv = ScrolledCanvas(root)
+    canv = ScrolledCanvas.ScrolledCanvas(root)
     data.canv = canv
     canv.pack()
     data.root = root
     canvas = canv.canvas
-    init(data, canvas)
-    data.speed = 5
-    data.x = 0
-    data.y = 500
+    initAll(data,canvas)
     # set up events
     root.bind("<Button-1>", lambda event:
                             mousePressedWrapper(event, canvas, data))
     root.bind("<Key>", lambda event:
                             keyPressedWrapper(event, canvas, data))
+    root.bind("<Motion>", lambda event: detectHover(event,canvas,data))
     timerFiredWrapper(canvas, data)
     # and launch the app
     root.mainloop()  # blocks until window is closed
     print("bye!")
 
-def makeSearch(data):
-    data.searchInput = data.searchEntry.get()
-    keywords = data.searchInput.split(" ")
-    data.titles = data.scraper.searchAllStudies(keywords)
-    updateSearchList(data)
-
-def updateSearchList(data):
-    for i in range(data.scrollStart, data.scrollEnd):
-        data.searchList[i] = data.scraper.getPreview(data.titles[i]).split("\n")
-
-def createTitle(canvas, inputText, inputFont, charLimit, x, y, spacing, endGap):
-    if len(inputText) < charLimit:
-        canvas.create_text(x,y,text = inputText, font = inputFont, anchor = NW)
-    else:
-        textCopy = inputText
-        while len(textCopy) > charLimit:
-            i = findClosestSpace(textCopy,charLimit)
-            canvas.create_text(x,y,text = textCopy[:i+1], font = inputFont, anchor = NW)
-            textCopy = textCopy[i+1:]
-            y += spacing
-        canvas.create_text(x,y,text = textCopy, font = inputFont, anchor = NW)
-    y += endGap
-    return y
-
-def findClosestSpace(text, charLimit):
-    result = charLimit
-    while text[result] != " ":
-        result -= 1
-    return result
-
-def searchBack(data):
-    if data.scrollStart < 5:
-        pass
-    else:
-        data.scrollStart -= 5
-        data.scrollEnd -= 5
-        updateSearchList(data)
-
-def searchNext(data):
-    if len(data.titles) > data.scrollEnd + 5:
-        data.scrollEnd += 5
-        data.scrollStart += 5
-        updateSearchList(data)
-    else:
-        pass
-
-def indivSearch(data):
-    clickedTitle = data.titles[data.currentRectNum + data.scrollStart]
-    summary = data.scraper.getSummary(clickedTitle)
-    displaySummary(data,summary)
-
-def faveSearch(data):
-    clickedTitle = data.titles[data.currentRectNum + data.scrollStart]
-    print(data.scraper.url_map[clickedTitle])
-
-def displaySummary(data,summary):
-    (charLimit, spacing, endGap) = (41,32,37)
-    newWindow = Toplevel()
-    newCanvas = Canvas(newWindow)
-    (charLimit, spacing, endGap) = (41,32,37)
-    x,y = 0,0
-    y = createTitle(newCanvas, summary[0], "Helvetica 18", charLimit, x, y, spacing, endGap)
-    (charLimit, spacing, endGap) = (100,15,30)
-    y = createTitle(newCanvas, summary[1], "Helvetica 12", charLimit, x, y, spacing, endGap)
-    y = createTitle(newCanvas, summary[2], "Helvetica 12", charLimit, x, y, spacing, endGap)
-    (charLimit, spacing, endGap) = (105,15,55)
-    y = createTitle(newCanvas, summary[3], "Helvetica 8",  charLimit, x, y, spacing, endGap)
-    y = createTitle(newCanvas, summary[4], "Helvetica 8",  charLimit, x, y, spacing, endGap)
-    y = createTitle(newCanvas, summary[5], "Helvetica 8",  charLimit, x, y, spacing, endGap)
-    y += 50
-    newCanvas.pack()
-    newWindow.mainloop()
+run()

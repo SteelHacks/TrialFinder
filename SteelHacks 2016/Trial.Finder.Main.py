@@ -1,4 +1,6 @@
+
 from tkinter import *
+from profpy import *
 
 # import all necessary files
 import Scraper
@@ -15,14 +17,15 @@ data = Struct()
 def initAll(data,canvas):
 
     canvas.config(bg="black")
-
     # variables
     data.mode = "welcomeScreen"
     data.backToHomeButton = Button(canvas,text="Back to Home",command = lambda: backToHomeButtonPressed(data),bg="white")
     data.currentUser = None
 
+    
+
     # init all modes
-    welcome.initWelcome(data)
+    welcome.initWelcome(canvas, data)
     homepage.initHomepage(data,canvas)
     editprofile.initEditProfile(data)
     searchscreen.initBrowse(data,canvas)
@@ -69,6 +72,8 @@ def detectHover(event,canvas,data):
     if(data.mode == "newUser"): 
         newUser.mouseMotion(event,data)
         return
+    elif(data.mode == 'welcomeScreen'):
+        welcome.motion(event, canvas, data)
     # if menu is already there, then show it until the mouse is off the menu
     if(data.displayMenu and
        canvas.winfo_pointerx()-canvas.winfo_rootx() < data.menuSize[0]):

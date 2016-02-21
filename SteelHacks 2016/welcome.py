@@ -73,5 +73,3 @@ def welcomeRedrawAll(canvas, data):
     canvas.create_window(data.width/2, data.height - 100, window=data.newUserButton)
 
 
-
-

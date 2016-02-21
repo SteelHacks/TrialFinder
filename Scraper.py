@@ -206,3 +206,15 @@ class Scraper(object):
         result += self.getCriteria(title) + "\n\n"
         result += self.getExclusion(title)
         return result
+
+    def getPreview(self,title):
+        result = title + "\n"
+        timeframe = self.getTimeFrame(title)
+        result += "Start Date: " + timeframe[0] + "     "
+        result += "End Date: " + timeframe[1] + "\n\n"
+        trialPurpose = self.getPurpose(title)
+        if(len(trialPurpose) > 150):
+            result += trialPurpose[0:150] + "...\n\n"
+        else:
+            result += trialPurpose + "\n\n"
+        return result

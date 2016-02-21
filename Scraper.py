@@ -48,7 +48,7 @@ class Scraper(object):
             treated_key = ASCIIfy(key)
             contents += treated_key + "::"
             contents += dictionary[key] + "\n\n"
-        writeFile('savedTrials.txt', contents)
+        writeFile('savedTrials.txt', contents.strip())
 
     #parses a text file to get a dictionary of title:url
     @staticmethod

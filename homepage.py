@@ -1,33 +1,27 @@
 from tkinter import *
 import Scraper
-
+import searchscreen
 
 def initHomepage(data,canvas):
+	print("initializing")
 
 	data.displayMenu = False
 	data.searchbar = Entry(data.root,width=40)
 	data.scraper = Scraper.Scraper()
 	data.menuSize = (150,data.height)
 	data.menuSlider = data.menuSize[0] * -1
-	data.scrollbar = Scrollbar(data.root)
 
 	# BUTTONS
 	data.searchButton = Button(canvas,text="Search",command = lambda: searchButtonPressed(data)) # add options later
 
-	#initScrollbar(data)
 	initMenu(data,canvas)
 	loadProfilePicture()
 	loadQuickMenu()
-	loadTrendingFeed()
+	loadUsersTrials()
+
+	data.testFrame = Frame(data.root,width=50,height=50,bg="red")
+
 	print("initialized homepage successfully")
-
-def initScrollbar(data):
-
-	data.scrollbar = Scrollbar(data.root)
-	canvas = Canvas(data.root, bd=0,
-                yscrollcommand=data.scrollbar.set)
-	data.scrollbar.config(command=canvas.yview,state=ACTIVE)
-	data.scrollbar.set(0,0)
 
 def initMenu(data,canvas):
 	print("initMenu")
@@ -40,7 +34,7 @@ def browseButtonPressed(data):
 
 def myProfileButtonPressed(data):
 	print("myProfile button clicked")
-	data.mode = "myProfile"	
+	data.mode = "editProfile"	
 
 def loadProfilePicture():
 	print("loadProfilePicture")
@@ -49,8 +43,9 @@ def loadQuickMenu():
 	print("loading QuickMenu")
 
 
-def loadTrendingFeed():
-	print("loadTrendingFeed")
+def loadUsersTrials():
+	print("loading user's trials")
+
 
 def homepageKeyPressed(event,data):
 	pass
@@ -73,33 +68,34 @@ def detectHover(event,canvas,data):
 	data.displayMenu = True
 
 def homepageRedrawAll(canvas,data):
+	canvas.create_image(data.width/2,100, image=data.logo)
 	drawProfilePicture(canvas,data)
 	drawSearchBar(canvas,data)
 	drawMenu(canvas,data)
-	data.scrollbar.pack(side=RIGHT,fill=Y)
+	canvas.create_window(420,300,window=data.testFrame)
 
 def drawSearchBar(canvas,data):
-	searchbarPos = (400,160)
-	searchbuttonPos = (570,160)
+	searchbarPos = (420,210)
+	searchbuttonPos = (590,210)
 	canvas.create_window(searchbarPos,window=data.searchbar)
 	canvas.create_window(searchbuttonPos,window=data.searchButton)
 
 def drawProfilePicture(canvas,data):
-	canvas.create_rectangle(200,140,250,190)
-	canvas.create_text(200,170,text="profile pic")
+	canvas.create_rectangle(220,190,270,240,fill="white")
+	canvas.create_text(200,220,text="profile pic",fill="white")
 
 def drawMenu(canvas,data):
-	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1])
+	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1],fill="white")
 	canvas.create_window(75 + data.menuSlider,230,window = data.myProfileButton)
 	canvas.create_window(75 + data.menuSlider,300,window = data.browseButton)
-
 	# replace this with user data
-	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1] - 550)
-	canvas.create_text(50 + data.menuSlider,50,text="user data here")
+	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1] - 550,fill="white")
+	canvas.create_text(50 + data.menuSlider,50,text=data.currentUser,fill="black")
 
 def searchButtonPressed(data):
 	print("search button pressed")
-	# cast to list to fit Scraper function parameter
+	data.mode = "browse"
 	searchTerm = list()
 	searchTerm.append(data.searchbar.get())
-	searchResults = data.scraper.searchAllStudies(searchTerm)
+	data.titles = data.scraper.searchAllStudies(searchTerm)
+	searchscreen.updateSearchList(data)

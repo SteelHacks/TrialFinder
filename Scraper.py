@@ -56,9 +56,9 @@ class Scraper(object):
         contents = readFile(filepath)
         result = dict()
         for line in contents.split("\n\n"):
-            separator = line.find('::')
-            key = line[: separator]
-            value = line[separator + 2 :]
+            seperator = line.find('::')
+            key = line[: seperator]
+            value = line[seperator + 2 :]
             result[key] = value
         return result
 
@@ -211,10 +211,10 @@ class Scraper(object):
         result = title + "\n"
         timeframe = self.getTimeFrame(title)
         result += "Start Date: " + timeframe[0] + "     "
-        result += "End Date: " + timeframe[1] + "\n\n"
+        result += "End Date: " + timeframe[1] + "\n"
         trialPurpose = self.getPurpose(title)
         if(len(trialPurpose) > 150):
-            result += trialPurpose[0:150] + "...\n\n"
+            result += trialPurpose[0:150] + "..."
         else:
-            result += trialPurpose + "\n\n"
+            result += trialPurpose
         return result

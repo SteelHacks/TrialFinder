@@ -1,29 +1,53 @@
 from tkinter import *
+import Scraper
 
-class Struct(object): pass
-data = Struct()
 
 def initHomepage(data,canvas):
 
 	data.displayMenu = False
-	data.searchButton = Button(canvas,text="Search",command=searchButtonPressed) # add options later
-
 	data.searchbar = Entry(data.root,width=40)
+	data.scraper = Scraper.Scraper()
+	data.menuSize = (150,data.height)
+	data.menuSlider = data.menuSize[0] * -1
+	data.scrollbar = Scrollbar(data.root)
 
-	initMenu()
+	# BUTTONS
+	data.searchButton = Button(canvas,text="Search",command = lambda: searchButtonPressed(data)) # add options later
+
+	#initScrollbar(data)
+	initMenu(data,canvas)
 	loadProfilePicture()
 	loadQuickMenu()
 	loadTrendingFeed()
 	print("initialized homepage successfully")
 
-def initMenu():
+def initScrollbar(data):
+
+	data.scrollbar = Scrollbar(data.root)
+	canvas = Canvas(data.root, bd=0,
+                yscrollcommand=data.scrollbar.set)
+	data.scrollbar.config(command=canvas.yview,state=ACTIVE)
+	data.scrollbar.set(0,0)
+
+def initMenu(data,canvas):
 	print("initMenu")
+	data.myProfileButton = Button(canvas,text="My Profile", command = lambda: myProfileButtonPressed(data))
+	data.browseButton = Button(canvas,text="Browse",command = lambda: browseButtonPressed(data))
+
+def browseButtonPressed(data):
+	print("browse button clicked")
+	data.mode = "browse"
+
+def myProfileButtonPressed(data):
+	print("myProfile button clicked")
+	data.mode = "myProfile"	
 
 def loadProfilePicture():
 	print("loadProfilePicture")
 	
 def loadQuickMenu():
-	print("loadQuickMenu")
+	print("loading QuickMenu")
+
 
 def loadTrendingFeed():
 	print("loadTrendingFeed")
@@ -32,7 +56,9 @@ def homepageKeyPressed(event,data):
 	pass
 
 def homepageTimerFired(data):
-    pass
+	if(data.displayMenu):
+		if(data.menuSlider < 0): data.menuSlider += 15
+	elif(data.menuSlider > data.menuSize[0] * -1): data.menuSlider -= 15
 
 def homepageMousePressed(event,data):
 	pass
@@ -48,69 +74,32 @@ def detectHover(event,canvas,data):
 
 def homepageRedrawAll(canvas,data):
 	drawProfilePicture(canvas,data)
-	drawQuickMenu(canvas,data)
 	drawSearchBar(canvas,data)
-	if(data.displayMenu):
-		drawMenu(canvas,data)
+	drawMenu(canvas,data)
+	data.scrollbar.pack(side=RIGHT,fill=Y)
 
 def drawSearchBar(canvas,data):
-	searchbarPos = (320,50)
-	searchbuttonPos = (500,50)
+	searchbarPos = (400,160)
+	searchbuttonPos = (570,160)
 	canvas.create_window(searchbarPos,window=data.searchbar)
 	canvas.create_window(searchbuttonPos,window=data.searchButton)
 
-def drawQuickMenu(canvas,data):
-	canvas.create_rectangle(280,200,650,250)
-	canvas.create_text(280,200,text="quickmenu")
-
 def drawProfilePicture(canvas,data):
-	canvas.create_rectangle(200,200,250,250)
-	canvas.create_text(200,200,text="profile pic")
+	canvas.create_rectangle(200,140,250,190)
+	canvas.create_text(200,170,text="profile pic")
 
 def drawMenu(canvas,data):
-	canvas.create_rectangle(0,0,150,data.height)
+	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1])
+	canvas.create_window(75 + data.menuSlider,230,window = data.myProfileButton)
+	canvas.create_window(75 + data.menuSlider,300,window = data.browseButton)
 
-def searchButtonPressed():
+	# replace this with user data
+	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1] - 550)
+	canvas.create_text(50 + data.menuSlider,50,text="user data here")
+
+def searchButtonPressed(data):
 	print("search button pressed")
-	print("search term: ",data.searchbar.get())
-
-def run(width=850, height=700):
-    def redrawAllWrapper(canvas, data):
-        canvas.delete(ALL)
-        homepageRedrawAll(canvas, data)
-        canvas.update()    
-
-    def mousePressedWrapper(event, canvas, data):
-        homepageMousePressed(event,data)
-        redrawAllWrapper(canvas, data)
-
-    def keyPressedWrapper(event, canvas, data):
-        homepageKeyPressed(event,data)
-        redrawAllWrapper(canvas, data)
-
-    def timerFiredWrapper(canvas, data):
-        homepageTimerFired(data)
-        redrawAllWrapper(canvas, data)
-        # pause, then call timerFired again
-        canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
-    # Set up data and call init
-    data.width = width
-    data.height = height
-    data.timerDelay = 100 # milliseconds
-    # create the root and the canvas
-    root = Tk()
-    canvas = Canvas(root, width=data.width, height=data.height)
-    data.root = root
-    initHomepage(data,canvas)
-    canvas.pack()
-    # set up events
-    data.root.bind("<Button-1>", lambda event:
-                            mousePressedWrapper(event, canvas, data))
-    data.root.bind("<Key>", lambda event:
-                            keyPressedWrapper(event, canvas, data))
-    root.bind("<Motion>", lambda event: detectHover(event,canvas,data))
-    timerFiredWrapper(canvas, data)
-    # and launch the app
-    root.mainloop()  # blocks until window is closed
-
-run()
+	# cast to list to fit Scraper function parameter
+	searchTerm = list()
+	searchTerm.append(data.searchbar.get())
+	searchResults = data.scraper.searchAllStudies(searchTerm)

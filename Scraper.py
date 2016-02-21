@@ -56,9 +56,9 @@ class Scraper(object):
         contents = readFile(filepath)
         result = dict()
         for line in contents.split("\n\n"):
-            seperator = line.find('::')
-            key = line[: seperator]
-            value = line[seperator + 2 :]
+            separator = line.find('::')
+            key = line[: separator]
+            value = line[separator + 2 :]
             result[key] = value
         return result
 

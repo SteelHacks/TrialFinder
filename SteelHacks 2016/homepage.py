@@ -19,8 +19,6 @@ def initHomepage(data,canvas):
 	loadQuickMenu()
 	loadUsersTrials()
 
-	data.testFrame = Frame(data.root,width=50,height=50,bg="red")
-
 	print("initialized homepage successfully")
 
 def initMenu(data,canvas):
@@ -68,21 +66,15 @@ def detectHover(event,canvas,data):
 	data.displayMenu = True
 
 def homepageRedrawAll(canvas,data):
-	canvas.create_image(data.width/2,100, image=data.logo)
-	drawProfilePicture(canvas,data)
+	canvas.create_image(data.width/2-30,160, image=data.logo)
 	drawSearchBar(canvas,data)
 	drawMenu(canvas,data)
-	canvas.create_window(420,300,window=data.testFrame)
 
 def drawSearchBar(canvas,data):
-	searchbarPos = (420,210)
-	searchbuttonPos = (590,210)
-	canvas.create_window(searchbarPos,window=data.searchbar)
+	searchbarPos = (410,320)
+	searchbuttonPos = (635,320)
+	canvas.create_window(searchbarPos,window=data.searchbar,height=40,width=350)
 	canvas.create_window(searchbuttonPos,window=data.searchButton)
-
-def drawProfilePicture(canvas,data):
-	canvas.create_rectangle(220,190,270,240,fill="white")
-	canvas.create_text(200,220,text="profile pic",fill="white")
 
 def drawMenu(canvas,data):
 	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1],fill="white")
@@ -90,7 +82,7 @@ def drawMenu(canvas,data):
 	canvas.create_window(75 + data.menuSlider,300,window = data.browseButton)
 	# replace this with user data
 	canvas.create_rectangle(0 + data.menuSlider,0,data.menuSize[0] + data.menuSlider,data.menuSize[1] - 550,fill="white")
-	canvas.create_text(50 + data.menuSlider,50,text=data.currentUser,fill="black")
+	canvas.create_text(50 + data.menuSlider,50,text=data.activeUser,fill="black",font="Helvetica 17 bold")
 
 def searchButtonPressed(data):
 	print("search button pressed")

@@ -2,7 +2,9 @@ from tkinter import *
 from webscraper import Scraper
 from ScrolledCanvas import *
 
-def init(data):
+def init(data,canvas):
+    data.canvas = canvas
+
     data.searchInput = ""
     data.searchBarClicked = False
     data.searchBarWidth = 400
@@ -16,34 +18,23 @@ def init(data):
     data.searchButtonLeft = 600
     data.searchButtonTop = 50
     data.searchButtonClicked = False
-    data.searchButton = Button(data.root, bd = 5, font = "Times 12", 
+    data.searchButton = Button(data.root, bd = 5, font = "Helvetica 12", 
                    text = "Search", command = lambda: makeSearch(data))
     data.searchTerms = []
+    data.searchList = {1:None, 2:None, 3:None, 4:None, 5:None}
 
     data.scraper = Scraper()
     data.showResults = False
     data.titles = None
 
     data.scrollStart = 0
-    data.scrollEnd = 3
+    data.scrollEnd = 5
 
 def mousePressed(event, data):
     pass
-    # if (data.searchBarLeft <= event.x <= data.searchBarLeft + data.searchBarWidth) and\
-    #    (data.searchBarTop <= event.y <= data.searchBarTop + data.searchBarHeight):
-    #         data.searchBarClicked = True
-    # else: data.searchBarClicked = False
-    # if data.searchButtonLeft <= event.x <= data.searchButtonLeft + data.searchButtonWidth and\
-    #    data.searchButtonTop <= event.y <= data.searchButtonTop + data.searchButtonHeight:
-    #         data.searchButtonClicked = True
 
 def keyPressed(event, data):
     pass
-    # if data.searchBarClicked:
-    #     if event.keysym != "BackSpace":
-    #         data.searchInput += event.keysym
-    #     elif len(data.searchInput) > 0:
-    #         data.searchInput = data.searchInput[:len(data.searchInput)]
 
 def timerFired(data):
     pass
@@ -59,10 +50,16 @@ def redrawAll(canvas, data):
         drawSearchPreviews(canvas,data)
 
 def drawSearchPreviews(canvas,data):
-    x,y = 0,0
+    x,y = data.searchBarLeft, data.searchBarTop + data.searchBarHeight + 100
     for i in range(data.scrollStart, data.scrollEnd):
-        canvas.create_text(x,y,text = data.scraper.getPreview(data.titles[i]), anchor = NW)
-        y += 200
+        (charLimit, spacing, endGap) = (41,32,37)
+        y = createTitle(canvas, data.searchList[i][0], "Helvetica 18", charLimit, x, y, spacing, endGap)
+        (charLimit, spacing, endGap) = (100,15,30)
+        y = createTitle(canvas, data.searchList[i][1], "Helvetica 12", charLimit, x, y, spacing, endGap)
+        (charLimit, spacing, endGap) = (105,15,55)
+        y = createTitle(canvas, data.searchList[i][2], "Helvetica 8",  charLimit, x, y, spacing, endGap)
+        y += 50
+    
 
 def run(width=300, height=300):
     def redrawAllWrapper(canvas, data):
@@ -88,7 +85,7 @@ def run(width=300, height=300):
     data = Struct()
     data.width = width
     data.height = height
-    data.timerDelay = 100 # milliseconds
+    data.timerDelay = 500 # milliseconds
     # create the root and the canvas
     root = Tk()
     frame = Frame(root)
@@ -97,7 +94,7 @@ def run(width=300, height=300):
     canv.pack()
     data.root = root
     canvas = canv.canvas
-    init(data)
+    init(data, canvas)
     data.speed = 5
     data.x = 0
     data.y = 500
@@ -115,5 +112,30 @@ def makeSearch(data):
     data.searchInput = data.searchEntry.get()
     keywords = data.searchInput.split(" ")
     data.titles = data.scraper.searchAllStudies(keywords)
+    updateSearchList(data)
+
+def updateSearchList(data):
+    for i in range(data.scrollStart, data.scrollEnd):
+        data.searchList[i] = data.scraper.getPreview(data.titles[i]).split("\n")
+
+def createTitle(canvas, inputText, inputFont, charLimit, x, y, spacing, endGap):
+    if len(inputText) < charLimit:
+        canvas.create_text(x,y,text = inputText, font = inputFont, anchor = NW)
+    else:
+        textCopy = inputText
+        while len(textCopy) > charLimit:
+            i = findClosestSpace(textCopy,charLimit)
+            canvas.create_text(x,y,text = textCopy[:i+1], font = inputFont, anchor = NW)
+            textCopy = textCopy[i+1:]
+            y += spacing
+        canvas.create_text(x,y,text = textCopy, font = inputFont, anchor = NW)
+    y += endGap
+    return y
+
+def findClosestSpace(text, charLimit):
+    result = charLimit
+    while text[result] != " ":
+        result -= 1
+    return result
 
 run(850, 650)

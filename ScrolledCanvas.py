@@ -16,7 +16,6 @@ class ScrolledCanvas(Frame):
         canv.pack(side=LEFT, expand=YES, fill=BOTH)       
         canv.bind('<Double-1>', self.onDoubleClick)       # set event handler
         self.canvas = canv
-        self.canvas.create_text(50,50,text="test",fill='red')
 
     def onDoubleClick(self, event):                  
         print(event.x, event.y)
@@ -28,4 +27,4 @@ class ScrolledCanvas(Frame):
 
 
 
-if __name__ == '__main__': ScrolledCanvas().mainloop()
+#if __name__ == '__main__': ScrolledCanvas().mainloop()

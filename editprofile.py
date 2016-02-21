@@ -12,20 +12,23 @@ from tkinter import *
 ####################################
 
 def init(data):
+    data.image = PhotoImage(file="smalogo.gif")
+    print(data.image)
     data.conditionEntry = Entry(data.root, font ="Helvetica 44",text="poo", bd =5)
     data.mode = "editProfile"
     data.currentUser = "Scott"
     data.profiles = interperateProfiles("profiles.txt")
 
 def mousePressed(event, data):
-    for i in range(8):
-        print(event.x, event.y, i)
-        print(380<event.x<410, "x")
-        print(260+50*(i) , 230+50*(i), "y", event.y)
-        print(260+50*(i) < event.y < 230+50*(i))
-        if(380 < event.x < 410 and (260+50*(i)) < event.y < (230+50*(i))):
-            print("ya")
-            data.profiles.pop(i)
+    # for i in range(8):
+    #     print(event.x, event.y, i)
+    #     print(380<event.x<410, "x")
+    #     print(260+50*(i) , 230+50*(i), "y", event.y)
+    #     print(260+50*(i) < event.y < 230+50*(i))
+    #     if(380 < event.x < 410 and (260+50*(i)) < event.y < (230+50*(i))):
+    #         print("ya")
+    #         data.profiles.pop(i)
+    pass
 
 def keyPressed(event, data):
     # use event.char and event.keysym
@@ -39,11 +42,13 @@ def timerFired(data):
     pass
 
 def redrawAll(canvas, data):
-    canvas.create_text(30,80,font="Helvetica 44", text="My Profile -- " + data.currentUser, anchor="sw")
-    canvas.create_text(30,140,font="Helvetica 24", text="Add a Topic of Interest:", anchor="sw")
+    canvas.create_rectangle(0,0,data.width,data.height, fill="black")
+    canvas.create_image(660,100, image=data.image)
+    canvas.create_text(30,80,font="Helvetica 44", fill="white", text="My Profile -- " + data.currentUser, anchor="sw")
+    canvas.create_text(30,140,font="Helvetica 24", fill="white",text="Add a Topic of Interest:", anchor="sw")
     canvas.create_window(30,215, window= data.conditionEntry, anchor="sw")    
     for x in range(len(data.profiles[data.currentUser])):
-        canvas.create_text(30+(425*(x//8)), 260 + 50 * (x%8), text=data.profiles[data.currentUser][x], font="Helvetica 24", anchor = "sw")
+        canvas.create_text(30+(425*(x//8)), 260 + 50 * (x%8), fill="white", text=data.profiles[data.currentUser][x], font="Helvetica 24", anchor = "sw")
         canvas.create_rectangle(380+(425*(x//8)), 260+50*(x%8), 410+(425*(x//8)), 230+50*(x%8), fill="red")
         canvas.create_text(395+(425*(x//8)), 245 +50*(x%8), text="X",anchor="center")
 

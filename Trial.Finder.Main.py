@@ -3,6 +3,7 @@ from tkinter import *
 # import all necessary files
 import Scraper
 import homepage
+import ScrolledCanvas
 
 class Struct(object): pass
 data = Struct()
@@ -51,18 +52,18 @@ def detectHover(event,canvas,data):
         data.displayMenu = False
     else: data.displayMenu = True
 
-def run(width=850, height=600):
+def run(width=850, height=700):
     def redrawAllWrapper(canvas, data):
-        canvas.delete(ALL)
+        data.canv.delete()
         redrawAll(canvas, data)
         canvas.update()    
 
     def mousePressedWrapper(event, canvas, data):
-        mousePressed(event,data)
+        mousePressed(event, data)
         redrawAllWrapper(canvas, data)
 
     def keyPressedWrapper(event, canvas, data):
-        keyPressed(event,data)
+        keyPressed(event, data)
         redrawAllWrapper(canvas, data)
 
     def timerFiredWrapper(canvas, data):
@@ -71,23 +72,30 @@ def run(width=850, height=600):
         # pause, then call timerFired again
         canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
     # Set up data and call init
+    class Struct(object): pass
+    data = Struct()
     data.width = width
     data.height = height
-    data.timerDelay = 50 # milliseconds
+    data.timerDelay = 40 # milliseconds
     # create the root and the canvas
     root = Tk()
-    canvas = Canvas(root, width=data.width, height=data.height)
+    frame = Frame(root)
+    canv = ScrolledCanvas.ScrolledCanvas(root)
+    data.canv = canv
+    canv.pack()
     data.root = root
+    canvas = canv.canvas
     initAll(data,canvas)
-    canvas.pack()
     # set up events
-    data.root.bind("<Button-1>", lambda event:
+    root.bind("<Button-1>", lambda event:
                             mousePressedWrapper(event, canvas, data))
-    data.root.bind("<Key>", lambda event:
+    root.bind("<Key>", lambda event:
                             keyPressedWrapper(event, canvas, data))
-    root.bind("<Motion>", lambda event: detectHover(event,canvas,data))
+    root.bind("<Motion>", lambda event:
+                            detectHover(event,canvas,data))
     timerFiredWrapper(canvas, data)
     # and launch the app
     root.mainloop()  # blocks until window is closed
+    print("bye!")
 
 run()

@@ -1,6 +1,7 @@
 #imports
 import requests
 from bs4 import BeautifulSoup
+from Utilities import *
 
 #neatly package all the webscraping tools
 class Scraper(object):
@@ -38,6 +39,28 @@ class Scraper(object):
             if(ord(char) > 127):
                 return False
         return True
+
+    #writes an arbitrary dictionary title:url to a text file
+    @staticmethod
+    def writeLinksToText(dictionary):
+        contents = ""
+        for key in dictionary:
+            treated_key = ASCIIfy(key)
+            contents += treated_key + "::"
+            contents += dictionary[key] + "\n\n"
+        writeFile('savedTrials.txt', contents)
+
+    #parses a text file to get a dictionary of title:url
+    @staticmethod
+    def readTrialsFromText(filepath):
+        contents = readFile(filepath)
+        result = dict()
+        for line in contents.split("\n\n"):
+            seperator = line.find('::')
+            key = line[: seperator]
+            value = line[seperator + 2 :]
+            result[key] = value
+        return result
 
     #returns the url generated from searching keywords on clinicaltrials.gov
     def generateURL(self, keywords):
@@ -83,10 +106,10 @@ class Scraper(object):
                     base = "https://clinicaltrials.gov"
                     new_url = base + line[url_start: url_end]
                     if(start != -1 and end != -1):
-                        title = line[start: end]
+                        title = ASCIIfy(line[start: end])
                         titles.append(title)
                         #map titles to a url in object memory
-                        self.url_map[title] = new_url
+                        self.url_map[title] = ASCIIfy(new_url)
         return titles
 
     #for ease of implementation these functions can work
@@ -112,6 +135,7 @@ class Scraper(object):
         end = self.getEnd(soup, html)
         return (start, end)
 
+    #webscrapes for start date of trial
     def getStart(self, soup, html):
         length = len(html)
         start_index = None
@@ -121,6 +145,7 @@ class Scraper(object):
         if(start_index == None): return None
         return self.removeMarkup(html[start_index]).strip()
 
+    #web scrapes for end date of trial
     def getEnd(self, soup, html):
         length = len(html)
         end_index = None
@@ -134,6 +159,7 @@ class Scraper(object):
             result = date[0] + " " + date[1]
         return result.strip()
 
+    #webscrapes for  the trial criteria
     def getCriteria(self, title = None, link = None):
         soup = self.processURL(title, link)
         html = str(soup).splitlines()
@@ -152,6 +178,7 @@ class Scraper(object):
                 result += line + "\n"
         return result.strip()
 
+    #webscrapes for the trial exclusion criteria
     def getExclusion(self, title = None, link = None):
         soup = self.processURL(title, link)
         html = str(soup).splitlines()
@@ -168,6 +195,7 @@ class Scraper(object):
                 result += line + "\n"
         return result.strip()
 
+    #returns a summary of all a title's info
     def getSummary(self, title):
         result = title + "\n\n"
         result += "URL:\n" + self.url_map[title] + "\n\n"
@@ -178,22 +206,3 @@ class Scraper(object):
         result += self.getCriteria(title) + "\n\n"
         result += self.getExclusion(title)
         return result
-
-
-keywords = ["diabetes"]
-x = Scraper()
-titles = x.searchAllStudies(keywords)
-i = 2
-#title
-#print(titles[i], end = "\n\n")
-#URL
-#print(x.url_map[titles[i]], end = "\n\n")
-#START AND END DATE
-#print(x.getTimeFrame(title = titles[i]), end = "\n\n")
-#PURPOSE
-#print(x.getPurpose(titles[i]), end = "\n\n")
-#INCLUSION CRITERIA
-#print(x.getCriteria(titles[i]), end = "\n\n")
-#EXCLUSION CRITERIA
-#print(x.getExclusion(titles[i]), end = "\n\n")
-print(x.getSummary(titles[i]))
